@@ -816,7 +816,7 @@ function submitForm() {
             const table = calendar.querySelector('table tbody');
 
             const times = [
-                '09:00','09:30', '10:00', '10:30', '11:00', '11:30',
+                '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
                 '12:00', '12:30', '13:00', '13:30',
                 '14:00', '14:30', '15:00', '15:30',
                 '16:00', '16:30', '17:00', '17:30',
@@ -853,8 +853,11 @@ function submitForm() {
             }
 
 
-            // 現在の日時を取得
-            const now = new Date();
+    // 現在の日時と翌日の23:59を取得
+    const now = new Date();
+    const tomorrowEnd = new Date(now);
+    tomorrowEnd.setDate(now.getDate() + 1);
+    tomorrowEnd.setHours(23, 59, 59, 999);
 
             // テーブルの内容を更新
             for (let i = 0; i < 7; i++) {
@@ -882,6 +885,13 @@ function submitForm() {
                     const slotStart = new Date(day);
                     slotStart.setHours(parseInt(times[j].split(':')[0]), parseInt(times[j].split(':')[1]), 0, 0);
 
+            // 翌日までのセルを「×」に設定
+            if (slotStart <= tomorrowEnd) {
+                cell.textContent = '✕';
+                cell.classList.add('unavailable');
+                continue;
+            }
+
                     const slotEnd = new Date(slotStart);
                     let menuDuration = selectedMenuTime || 30;
                     let visitDuration = selectedVisitTime || 0;
@@ -896,14 +906,6 @@ function submitForm() {
                         cell.classList.add('unavailable');
                         continue;
                     } else if (slotEnd.getHours() > 19) {
-                        cell.textContent = '✕';
-                        cell.classList.add('unavailable');
-                        continue;
-                    }
-
-                    // ここで終了時間を使った条件処理を行う
-                    // 例えば、リアルタイムで既に過ぎた時間帯は×にする
-                    if (slotStart < now) {
                         cell.textContent = '✕';
                         cell.classList.add('unavailable');
                         continue;
